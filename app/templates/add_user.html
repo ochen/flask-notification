@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block content %}
+<h1>Register Notification Methods for a User</h1>
+<form action="" method="post" name="edituser">
+  {{ form.hidden_tag() }}
+  <dl>
+    {{ render_field(form.nickname) }}
+    {{ render_field(form.email, size=24) }}
+    {{ render_field(form.mobile, size=24) }}
+    {{ render_field(form.email_notification) }}
+    {{ render_field(form.sms_notification) }}
+    {{ render_field(form.app_notification) }}
+  </dl>
+  <p><input type="submit" value="Save Changes"></p>
+</form>
+{% endblock %}
+
