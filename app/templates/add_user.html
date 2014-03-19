@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>Register Notification Methods for a User</h1>
-<form action="" method="post" name="edituser">
+<form action="" method="post" name="adduser">
   {{ form.hidden_tag() }}
   <dl>
     {{ render_field(form.nickname) }}
@@ -13,7 +13,6 @@
     {{ render_field(form.sms_notification) }}
     {{ render_field(form.app_notification) }}
   </dl>
-  <p><input type="submit" value="Save Changes"></p>
+  <p><input type="submit" value="Submit"></p>
 </form>
 {% endblock %}
-

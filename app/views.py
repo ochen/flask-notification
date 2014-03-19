@@ -1,8 +1,8 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, request
 
 from app import app, db
 from .models import User, Template
-from .forms import AddUserForm, EditUserForm
+from .forms import AddUserForm, EditUserForm, AddTemplateForm, EditTemplateForm
 
 
 @app.route('/')
@@ -27,7 +27,7 @@ def add_user():
 
 
 @app.route('/user/<nickname>/edit', methods=['GET', 'POST'])
-def edit(nickname):
+def edit_user(nickname):
     form = EditUserForm()
     user = User.query.filter_by(nickname=nickname).first()
     if form.validate_on_submit():
@@ -51,9 +51,40 @@ def edit(nickname):
 
 @app.route('/template/<name>/edit', methods=['GET', 'POST'])
 def edit_template(name):
-    pass
+    form = EditTemplateForm()
+    template = Template.query.filter_by(name=name).first()
+    if request.method == 'POST':
+        if form.validate():
+            template.email = form.email.data
+            template.sms = form.sms.data
+            template.app = form.app.data
+            db.session.add(template)
+            db.session.commit()
+            flash('Changes for {} have been saved.'.format(nickname))
+            return redirect(url_for('index'))
+        else:
+            render_template('edit_template.html', form=form)
+    else:
+        form.email.data = template.email
+        form.sms.data = template.sms
+        form.app.data = template.app
+    return render_template('edit_template.html', form=form)
 
 
 @app.route('/template/add', methods=['GET', 'POST'])
 def add_template():
-    pass
+    form = AddTemplateForm()
+    if form.validate_on_submit():
+        template = Template.query.filter_by(name=form.name.data).first()
+        if template is not None:
+            flash("There is already a template for this notification type.")
+            return render_template('add_template.html', form=form)
+
+        name = form.name.data
+        template = Template(name=name, email=form.email.data,
+                sms=form.sms.data, app=form.app.data)
+        db.session.add(template)
+        db.session.commit()
+        flash('Template for notification type {} added.'.format(name))
+        return redirect(url_for('index'))
+    return render_template('add_template.html', form=form)

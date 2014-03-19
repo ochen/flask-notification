@@ -35,3 +35,15 @@ class EditUserForm(Form):
     sms_notification = BooleanField('Notify by SMS')
     app_notification = BooleanField('Notify by app push notification')
 
+
+class AddTemplateForm(Form):
+    name = TextField('Notification type', [validators.Required()])
+    email = TextAreaField('Email template', [validators.Required()])
+    sms = TextAreaField('SMS template', [validators.Required()])
+    app = TextAreaField('APP push notification template', [validators.Required()])
+
+
+class EditTemplateForm(Form):
+    email = TextAreaField('Email template', [validators.Required()])
+    sms = TextAreaField('SMS template', [validators.Required()])
+    app = TextAreaField('APP push notification template', [validators.Required()])

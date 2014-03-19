@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block content %}
+<h1>Register message templates for a notification type</h1>
+<form action="" method="post" name="add-template">
+  {{ form.hidden_tag() }}
+  <dl>
+    {{ render_field(form.name) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.sms) }}
+    {{ render_field(form.app) }}
+  </dl>
+  <p><input type="submit" value="Submit"></p>
+</form>
+{% endblock %}
