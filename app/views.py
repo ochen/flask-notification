@@ -2,6 +2,11 @@ from flask import render_template, flash, redirect, url_for
 
 from app import app, db
 
+
+@app.route('/')
+def index():
+    return "Hello"
+
 @app.route('/user/add', methods=['GET', 'POST'])
 def add_user():
     form = AddUserForm()
