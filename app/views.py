@@ -2,7 +2,8 @@ from flask import render_template, flash, redirect, url_for, request
 
 from app import app, db
 from .models import User, Template
-from .forms import AddUserForm, EditUserForm, AddTemplateForm, EditTemplateForm
+from .forms import AddUserForm, EditUserForm, AddTemplateForm, \
+    EditTemplateForm, NotifyForm
 
 
 @app.route('/')
@@ -88,3 +89,18 @@ def add_template():
         flash('Template for notification type {} added.'.format(name))
         return redirect(url_for('index'))
     return render_template('add_template.html', form=form)
+
+
+@app.route('/notify', methods=['GET', 'POST'])
+def notify():
+    form = NotifyForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(nickname=form.nickname.data).first()
+        if user is None:
+            raise Exception("User not found.")
+        template = form.notification_type.data
+        send_notifications(user, template)
+        flash("Sending notifications.")
+        return redirect(url_for('notify'))
+
+    return render_template('notify.html', form=form)

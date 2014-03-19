@@ -1,6 +1,9 @@
 from flask.ext.wtf import Form
 from wtforms import TextField, BooleanField, PasswordField, TextAreaField
 from wtforms import validators
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
+
+from .models import Template
 
 
 class RequiredIf(validators.Required):
@@ -47,3 +50,9 @@ class EditTemplateForm(Form):
     email = TextAreaField('Email template', [validators.Required()])
     sms = TextAreaField('SMS template', [validators.Required()])
     app = TextAreaField('APP push notification template', [validators.Required()])
+
+
+class NotifyForm(Form):
+    nickname = TextField('User name', [validators.Required()])
+    notification_type = QuerySelectField('Notification type', get_label='name',
+            query_factory=lambda: Template.query.all())
