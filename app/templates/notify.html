@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block content %}
+<h1>Send notifications to an user</h1>
+<form action="" method="post" name="notify">
+  {{ form.hidden_tag() }}
+  <dl>
+    {{ render_field(form.nickname) }}
+    {{ render_field(form.notification_type) }}
+  </dl>
+  <p><input type="submit" value="Send"></p>
+</form>
+{% endblock %}
