@@ -3,7 +3,8 @@ from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, abort
 
 from app import app, db
-from .models import User, Template, Order
+from config import LOGS_PER_PAGE
+from .models import User, Template, Order, NotificationLog
 from .forms import AddUserForm, EditUserForm, AddTemplateForm, \
     EditTemplateForm, NotifyForm, NewOrderForm
 from .notifications import send_notifications
@@ -11,7 +12,27 @@ from .notifications import send_notifications
 
 @app.route('/')
 def index():
-    return "Hello"
+    return render_template('index.html')
+
+
+@app.route('/users')
+def users():
+    users = User.query.all()
+    return render_template('users.html', users=users)
+
+
+@app.route('/templates')
+def templates():
+    templates = Template.query.all()
+    return render_template('templates.html', templates=templates)
+
+
+@app.route('/logs')
+@app.route('/logs/<int:page>')
+def logs(page=1):
+    logs = NotificationLog.query.paginate(page, LOGS_PER_PAGE, False)
+    return render_template('logs.html', logs=logs)
+
 
 @app.route('/user/add', methods=['GET', 'POST'])
 def add_user():
@@ -30,7 +51,7 @@ def add_user():
         db.session.add(user)
         db.session.commit()
         flash('User {} added.'.format(nickname))
-        return redirect(url_for('add_user'))
+        return redirect(url_for('users'))
     return render_template('add_user.html', form=form)
 
 
@@ -47,7 +68,7 @@ def edit_user(nickname):
         db.session.add(user)
         db.session.commit()
         flash('Changes for {} have been saved.'.format(nickname))
-        return redirect(url_for('index'))
+        return redirect(url_for('users'))
     else:
         form.email.data = user.email
         form.mobile.data = user.mobile
@@ -67,7 +88,7 @@ def new_order(nickname):
         db.session.add(order)
         db.session.commit()
         flash('New order added.')
-        return redirect(url_for('new_order', nickname=nickname))
+        return redirect(url_for('user', nickname=nickname))
 
     return render_template('new_order.html', form=form)
 
@@ -92,7 +113,7 @@ def edit_template(name):
             db.session.add(template)
             db.session.commit()
             flash('Changes for {} have been saved.'.format(nickname))
-            return redirect(url_for('index'))
+            return redirect(url_for('templates'))
         else:
             render_template('edit_template.html', form=form)
     else:
@@ -118,7 +139,7 @@ def add_template():
         db.session.add(template)
         db.session.commit()
         flash('Template for notification type {} added.'.format(name))
-        return redirect(url_for('index'))
+        return redirect(url_for('templates'))
 
     return render_template('add_template.html', form=form)
 

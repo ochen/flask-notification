@@ -16,3 +16,5 @@ MAIL_PASSWORD = os.environ['MAIL_PASSWORD']
 
 # administrator list
 ADMINS = ['ccl333@gmail.com']
+
+LOGS_PER_PAGE = 20

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Notification logs</h1>
+<ul>
+{% for log in logs.items %}
+<li>{{ log.timestamp.strftime("%Y-%m-%d %H:%M") }}:  Sent notification to {{ log.order.user.nickname }} with template "{{ log.template.name }}". [Order No. {{ log.order.id }}]</li>
+{% endfor %}
+</ul>
+{% if logs.has_prev %}
+    <a href="{{ url_for('logs', page=logs.prev_num) }}"><< Newer logs</a>
+{% else %}
+    << Newer
+{% endif %} |
+{% if logs.has_next %}
+    <a href="{{ url_for('logs', page=logs.next_num) }}">Older logs >></a>
+{% else %}
+    Older >>
+{% endif %}
+
+{% endblock %}

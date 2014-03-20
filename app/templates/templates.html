@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Templates</h1>
+<ul>
+{% for template in templates %}
+<li>{{ template.name }} (<a href="{{ url_for('edit_template', name=template.name) }}">Edit</a>)</li>
+{% endfor %}
+</ul>
+<div><a href="{{ url_for('add_template') }}">Add template</a></div>
+{% endblock %}

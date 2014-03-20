@@ -4,6 +4,14 @@
     <title>A Notification Tool</title>
   </head>
   <body>
+  <div id="nav">
+  <ul>
+    <li><a href="{{ url_for('users') }}">Users</a></li>
+    <li><a href="{{ url_for('templates') }}">Templates</a></li>
+    <li><a href="{{ url_for('logs') }}">Logs</a></li>
+    <li><a href="/rq">Queue Dashboard</a></li>
+  </ul>
+  </div>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     <ul>
