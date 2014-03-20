@@ -33,13 +33,11 @@ def send_email(user, subject_temp, body_temp):
 
     msg = Message(subject_temp, sender=ADMINS[0], recipients=[user.email])
     msg.body = body_temp
-    send_email_async(msg)
+    q.enqueue(send_email_func, msg)
 
 
-@job('', connection=redis_conn)
-def send_email_async(msg):
+def send_email_func(msg):
     mail.send(msg)
-
 
 def send_sms(user, temp):
     """ Send SMS.
