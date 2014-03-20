@@ -133,6 +133,6 @@ def notify(order_id):
         template = form.notification_type.data
         send_notifications(order, template)
         flash("Sending notifications.")
-        return redirect(url_for('notify'))
+        return redirect(url_for('user', nickname=order.user.nickname))
 
     return render_template('notify.html', form=form, order=order)
