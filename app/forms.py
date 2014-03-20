@@ -41,12 +41,16 @@ class EditUserForm(Form):
 
 class AddTemplateForm(Form):
     name = TextField('Notification type', [validators.Required()])
-    email = TextAreaField('Email template', [validators.Required()])
+    email_subject = TextField('Email subject template',
+            [validators.Required()])
+    email = TextAreaField('Email body template', [validators.Required()])
     sms = TextAreaField('SMS template', [validators.Required()])
     app = TextAreaField('APP push notification template', [validators.Required()])
 
 
 class EditTemplateForm(Form):
+    email_subject = TextField('Email subject template',
+            [validators.Required()])
     email = TextAreaField('Email template', [validators.Required()])
     sms = TextAreaField('SMS template', [validators.Required()])
     app = TextAreaField('APP push notification template', [validators.Required()])

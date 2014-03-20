@@ -4,6 +4,7 @@ from app import app, db
 from .models import User, Template
 from .forms import AddUserForm, EditUserForm, AddTemplateForm, \
     EditTemplateForm, NotifyForm
+from .notifications import send_notifications
 
 
 @app.route('/')
@@ -56,6 +57,7 @@ def edit_template(name):
     template = Template.query.filter_by(name=name).first()
     if request.method == 'POST':
         if form.validate():
+            template.email_subject = form.email_subject.data
             template.email = form.email.data
             template.sms = form.sms.data
             template.app = form.app.data
@@ -66,6 +68,7 @@ def edit_template(name):
         else:
             render_template('edit_template.html', form=form)
     else:
+        form.email_subject.data = template.email_subject
         form.email.data = template.email
         form.sms.data = template.sms
         form.app.data = template.app
@@ -82,12 +85,13 @@ def add_template():
             return render_template('add_template.html', form=form)
 
         name = form.name.data
-        template = Template(name=name, email=form.email.data,
-                sms=form.sms.data, app=form.app.data)
+        template = Template(name=name, email_subject=form.email_subject.data,
+                email=form.email.data, sms=form.sms.data, app=form.app.data)
         db.session.add(template)
         db.session.commit()
         flash('Template for notification type {} added.'.format(name))
         return redirect(url_for('index'))
+
     return render_template('add_template.html', form=form)
 
 

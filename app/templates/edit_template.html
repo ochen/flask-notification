@@ -6,6 +6,7 @@
 <form action="" method="post" name="edit-template">
   {{ form.hidden_tag() }}
   <dl>
+    {{ render_field(form.email_subject) }}
     {{ render_field(form.email) }}
     {{ render_field(form.sms) }}
     {{ render_field(form.app) }}
