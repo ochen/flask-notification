@@ -8,6 +8,7 @@ class User(db.Model):
     email_notification = db.Column(db.Boolean)
     sms_notification = db.Column(db.Boolean)
     app_notification = db.Column(db.Boolean)
+    orders = db.relationship('Order', backref='user', lazy='dynamic')
 
 
 class Template(db.Model):
@@ -18,3 +19,9 @@ class Template(db.Model):
     sms = db.Column(db.String(140))
     app = db.Column(db.String(140))
 
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime)
+    description = db.Column(db.String(200))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

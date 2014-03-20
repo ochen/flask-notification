@@ -57,6 +57,9 @@ class EditTemplateForm(Form):
 
 
 class NotifyForm(Form):
-    nickname = TextField('User name', [validators.Required()])
     notification_type = QuerySelectField('Notification type', get_label='name',
             query_factory=lambda: Template.query.all())
+
+
+class NewOrderForm(Form):
+    description = TextField('Order description', [validators.Required()])
