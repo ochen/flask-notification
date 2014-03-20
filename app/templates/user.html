@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>User {{ user.nickname }}'s orders</h1>
+{% if not orders %}
+  <div>User doesn't have any order.</div>
+{% endif %}
+<div><a href="{{ url_for('new_order', nickname=user.nickname) }}">New order</a></div>
+{% for order in orders %}
+  {% include 'orderitem.html' %}
+  <div><a href="{{ url_for('notify', order_id=order.id) }}">Notify user</a></div>
+{% endfor %}
+{% endblock %}
+

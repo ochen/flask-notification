@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block content %}
+<h1>New order</h1>
+<form action="" method="post" name="new-order">
+  {{ form.hidden_tag() }}
+  <dl>
+    {{ render_field(form.description) }}
+  </dl>
+  <p><input type="submit" value="Submit"></p>
+</form>
+{% endblock %}

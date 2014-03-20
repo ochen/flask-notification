@@ -1,9 +1,11 @@
-from flask import render_template, flash, redirect, url_for, request
+from datetime import datetime
+
+from flask import render_template, flash, redirect, url_for, request, abort
 
 from app import app, db
-from .models import User, Template
+from .models import User, Template, Order
 from .forms import AddUserForm, EditUserForm, AddTemplateForm, \
-    EditTemplateForm, NotifyForm
+    EditTemplateForm, NotifyForm, NewOrderForm
 from .notifications import send_notifications
 
 
@@ -16,6 +18,10 @@ def add_user():
     form = AddUserForm()
     if form.validate_on_submit():
         nickname = form.nickname.data
+        user = User.query.filter_by(nickname=nickname).first()
+        if user is not None:
+            flash("User name not available.")
+            return render_template('add_user.html', form=form)
         user = User(nickname=nickname, email=form.email.data,
                 mobile=form.mobile.data,
                 email_notification=form.email_notification.data,
@@ -24,7 +30,7 @@ def add_user():
         db.session.add(user)
         db.session.commit()
         flash('User {} added.'.format(nickname))
-        return redirect(url_for('index'))
+        return redirect(url_for('add_user'))
     return render_template('add_user.html', form=form)
 
 
@@ -49,6 +55,28 @@ def edit_user(nickname):
         form.sms_notification.data = user.sms_notification
         form.app_notification.data = user.app_notification
     return render_template('edit_user.html', form=form)
+
+
+@app.route('/user/<nickname>/neworder', methods=['GET', 'POST'])
+def new_order(nickname):
+    form = NewOrderForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(nickname=nickname).first()
+        order = Order(description=form.description.data,
+                timestamp=datetime.utcnow(), user=user)
+        db.session.add(order)
+        db.session.commit()
+        flash('New order added.')
+        return redirect(url_for('new_order', nickname=nickname))
+
+    return render_template('new_order.html', form=form)
+
+
+@app.route('/user/<nickname>')
+def user(nickname):
+    user = User.query.filter_by(nickname=nickname).first()
+    orders = user.orders.all()
+    return render_template('user.html', user=user, orders=orders)
 
 
 @app.route('/template/<name>/edit', methods=['GET', 'POST'])
@@ -95,16 +123,16 @@ def add_template():
     return render_template('add_template.html', form=form)
 
 
-@app.route('/notify', methods=['GET', 'POST'])
-def notify():
+@app.route('/<order_id>/notify', methods=['GET', 'POST'])
+def notify(order_id):
     form = NotifyForm()
+    order = Order.query.filter_by(id=order_id).first()
     if form.validate_on_submit():
-        user = User.query.filter_by(nickname=form.nickname.data).first()
-        if user is None:
-            raise Exception("User not found.")
+        if order is None:
+            abort(404)
         template = form.notification_type.data
-        send_notifications(user, template)
+        send_notifications(order, template)
         flash("Sending notifications.")
         return redirect(url_for('notify'))
 
-    return render_template('notify.html', form=form)
+    return render_template('notify.html', form=form, order=order)
