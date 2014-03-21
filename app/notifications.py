@@ -4,7 +4,8 @@ from flask.ext.mail import Message
 
 from app import app, db, mail, q, redis_conn
 from config import ADMINS
-from .models import NotificationLog
+from .models import NotificationLog, SEND_METHOD_EMAIL, SEND_METHOD_SMS, \
+    SEND_METHOD_APP
 
 
 def send_notifications(order, template):
@@ -22,26 +23,32 @@ def send_notifications(order, template):
             order_description=order.description, username=user.nickname)
 
     if user.email_notification:
-        send_email(user.email, template.email_subject.format(**order_info),
-                template.email.format(**order_info))
+        # send email
+        subject = template.email_subject.format(**order_info)
+        body = template.email.format(**order_info)
+        send_job = q.enqueue(send_email, user.email, subject, body)
+        # log after email sent
+        q.enqueue_call(add_log, args=(order, template, SEND_METHOD_EMAIL),
+                depends_on=send_job)
+
     if user.sms_notification:
         send_sms(user.mobile, template.sms.format(**order_info))
     if user.app_notification:
         send_app_push(user, template.app.format(**order_info))
     
-    add_log(order, template)
 
 
-def add_log(order, template):
+def add_log(order, template, method):
     """ Add a log of notifications.
     
     :order: the order which the notification is related to
     :template: the template of the notifications
+    :method: sent notification by which method
     :returns: @todo
 
     """
     log = NotificationLog(timestamp=datetime.utcnow(), order=order,
-            template=template)
+            template=template, method=method)
     db.session.add(log)
     db.session.commit()
 
@@ -56,14 +63,14 @@ def send_email(email, subject, body):
 
     """
 
-    msg = Message(subject, sender=ADMINS[0], recipients=[email])
-    msg.body = body
-    q.enqueue(send_email_func, msg)
+    with app.app_context():
+        msg = Message(subject, sender=ADMINS[0], recipients=[email])
+        msg.body = body
+        mail.send(msg)
 
 
 def send_email_func(msg):
-    with app.app_context():
-        mail.send(msg)
+    pass
 
 def send_sms(number, body):
     """ Send SMS.
