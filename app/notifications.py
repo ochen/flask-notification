@@ -14,7 +14,28 @@ def send_notifications(order, template):
 
     :order: the order which the notification is related to
     :template: the template to use
-    :returns: @todo
+
+    """
+
+    user = order.user
+
+    if user.email_notification:
+        # send email
+        send_notification(order, template, SEND_METHOD_EMAIL)
+    if user.sms_notification:
+        # send sms
+        send_notification(order, template, SEND_METHOD_SMS)
+    if user.app_notification:
+        # send app pushing
+        send_notification(order, template, SEND_METHOD_APP)
+
+
+def send_notification(order, template, method):
+    """ Send notification by specified method
+
+    :order: the order which the notification is related to
+    :template: the template to use
+    :method: send notification by which method
 
     """
 
@@ -22,20 +43,20 @@ def send_notifications(order, template):
     order_info = dict(order_id=order.id, order_timestamp=order.timestamp,
             order_description=order.description, username=user.nickname)
 
-    if user.email_notification:
-        # send email
+    if method == SEND_METHOD_EMAIL:
         subject = template.email_subject.format(**order_info)
         body = template.email.format(**order_info)
         send_job = q.enqueue(send_email, user.email, subject, body)
-        # log after email sent
-        q.enqueue_call(add_log, args=(order, template, SEND_METHOD_EMAIL),
-                depends_on=send_job)
+    elif method == SEND_METHOD_SMS:
+        send_job = q.enqueue(send_sms,
+                user.mobile, template.sms.format(**order_info))
+    elif method == SEND_METHOD_APP:
+        send_job = q.enqueue(send_app_push,
+                user, template.app.format(**order_info))
 
-    if user.sms_notification:
-        send_sms(user.mobile, template.sms.format(**order_info))
-    if user.app_notification:
-        send_app_push(user, template.app.format(**order_info))
-    
+    # log after sending job done.
+    q.enqueue_call(add_log, args=(order, template, method),
+            depends_on=send_job)
 
 
 def add_log(order, template, method):
@@ -68,9 +89,6 @@ def send_email(email, subject, body):
         msg.body = body
         mail.send(msg)
 
-
-def send_email_func(msg):
-    pass
 
 def send_sms(number, body):
     """ Send SMS.
