@@ -30,7 +30,9 @@ def templates():
 @app.route('/logs')
 @app.route('/logs/<int:page>')
 def logs(page=1):
-    logs = NotificationLog.query.paginate(page, LOGS_PER_PAGE, False)
+    logs = NotificationLog.query.\
+        order_by( NotificationLog.timestamp.desc()).\
+        paginate(page, LOGS_PER_PAGE, False)
     return render_template('logs.html', logs=logs)
 
 
