@@ -72,6 +72,7 @@ def add_log(order, template, method):
             template=template, method=method)
     db.session.add(log)
     db.session.commit()
+    return True
 
 
 def send_email(email, subject, body):
@@ -88,6 +89,7 @@ def send_email(email, subject, body):
         msg = Message(subject, sender=ADMINS[0], recipients=[email])
         msg.body = body
         mail.send(msg)
+    return True
 
 
 def send_sms(number, body):
